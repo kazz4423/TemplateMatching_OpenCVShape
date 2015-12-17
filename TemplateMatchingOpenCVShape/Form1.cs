@@ -23,11 +23,11 @@ namespace TemplateMatchingOpenCVShape
             InitializeComponent();
 
             //画像ファイルの読み込み
-            srcImg = new Mat("../../lena.jpg");
+            srcImg = new Mat("../../jozai/カプセルサンプル7.bmp");
             pictureBoxIpl1.ImageIpl = srcImg.ToIplImage();
 
             //テンプレート画像の読み込み
-            tmpImg = new Mat("../../lena_tmp.jpg");
+            tmpImg = new Mat("../../jozai/カプセルサンプル１_string.bmp");
             pictureBoxIpl2.ImageIpl = tmpImg.ToIplImage();
         }
 
@@ -42,20 +42,23 @@ namespace TemplateMatchingOpenCVShape
             Cv.MatchTemplate(srcImg.ToCvMat(), tmpImg.ToCvMat(), result, mtm);
             CvPoint minPoint = new CvPoint();
             CvPoint maxPoint = new CvPoint();
-            Cv.MinMaxLoc(result, out minPoint, out maxPoint);
+            double max_val, min_val;
+            Cv.MinMaxLoc(result, out min_val, out max_val,out minPoint, out maxPoint);
             
-            IplImage resultImg = srcImg.ToIplImage(); // picturBoxIplには直接Rectを書き込めないのでバッファを挟む
+            IplImage resultImg = srcImg.ToIplImage(); // pictureBoxIplには直接Rectを書き込めないのでバッファを挟む
             if (mtmFlag)
             {
                 CvRect rect = new CvRect(maxPoint, tmpImg.ToCvMat().GetSize());
-                resultImg.DrawRect(rect, new CvScalar(0, 255, 0), 2);
-                label3.Text = result[maxPoint.X, maxPoint.Y].ToString(); // 相関係数の取得
+                resultImg.DrawRect(rect, new CvScalar(255, 255, 255), 2);
+                //label3.Text = result[maxPoint.X, maxPoint.Y].ToString(); // 相関係数の取得
+                label3.Text = max_val.ToString(); // 相関係数の取得
             }
             else
             {
                 CvRect rect = new CvRect(minPoint, tmpImg.ToCvMat().GetSize());
-                resultImg.DrawRect(rect, new CvScalar(0, 255, 0), 2);
-                label3.Text = result[minPoint.X, minPoint.Y].ToString(); // 相関係数の取得
+                resultImg.DrawRect(rect, new CvScalar(255, 255, 255), 2);
+                //label3.Text = result[minPoint.X, minPoint.Y].ToString(); // 相関係数の取得
+                label3.Text = min_val.ToString(); // 相関係数の取得
             }
             
             pictureBoxIpl1.ImageIpl = resultImg;
@@ -96,6 +99,28 @@ namespace TemplateMatchingOpenCVShape
                     flag = false;
                     break;
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            int d1, d2;
+            d1 = 500;
+            d2 = 600;
+            IplImage dst;
+            dst = new IplImage(srcImg.ToIplImage().Size, srcImg.ToIplImage().Depth, 1);
+
+            Cv.Canny(srcImg.ToCvMat(), dst, d1, d2, ApertureSize.Size5);
+
+            pictureBoxIpl1.ImageIpl = dst;
+            srcImg = new Mat(dst);
+
+            dst = new IplImage(tmpImg.ToIplImage().Size, tmpImg.ToIplImage().Depth, 1);
+
+            Cv.Canny(tmpImg.ToCvMat(), dst, d1, d2, ApertureSize.Size5);
+
+            pictureBoxIpl2.ImageIpl = dst;
+            tmpImg = new Mat(dst);
+
         }
     }
 }
